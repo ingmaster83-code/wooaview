@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""_rawdata/list_raw.json + detail_raw.json -> _data/views.json"""
+"""_rawdata/list_raw*.json + detail_raw*.json -> _data/views.json"""
 import json
 import re
 from pathlib import Path
@@ -7,6 +7,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 LIST_SRC = ROOT / "_rawdata" / "list_raw.json"
 DETAIL_SRC = ROOT / "_rawdata" / "detail_raw.json"
+BRIDGE_LIST_SRC = ROOT / "_rawdata" / "list_raw_bridge.json"
+BRIDGE_DETAIL_SRC = ROOT / "_rawdata" / "detail_raw_bridge.json"
 OUT = ROOT / "_data" / "views.json"
 
 REGION_ALIAS = {
@@ -56,8 +58,8 @@ TYPE_RULES = [
     ("tower", ["타워"]),
     ("observation", ["전망대", "전망", "일몰", "낙조", "일출", "관망"]),
 ]
-TYPE_LABEL = {"skywalk": "스카이워크", "tower": "전망타워", "observation": "전망대", "etc": "기타 명소"}
-TYPE_ICON = {"skywalk": "🌉", "tower": "🗼", "observation": "🔭", "etc": "📍"}
+TYPE_LABEL = {"skywalk": "스카이워크", "tower": "전망타워", "observation": "전망대", "bridge": "다리/출렁다리", "etc": "기타 명소"}
+TYPE_ICON = {"skywalk": "🌉", "tower": "🗼", "observation": "🔭", "bridge": "🌁", "etc": "📍"}
 
 
 def classify_type(name):
@@ -103,14 +105,8 @@ def strip_html(text):
     return text
 
 
-def main():
-    list_items = json.loads(LIST_SRC.read_text(encoding="utf-8"))
-    details = json.loads(DETAIL_SRC.read_text(encoding="utf-8"))
-
-    region_seq = {}
-    views = []
+def process_source(list_items, details, region_seq, views, forced_type=None):
     skipped = 0
-
     for it in list_items:
         cid = it["contentid"]
         detail = details.get(cid, {})
@@ -132,7 +128,7 @@ def main():
         region_seq[region_slug] = region_seq.get(region_slug, 0) + 1
         slug = f"{region_slug}-{region_seq[region_slug]:03d}"
 
-        vtype = classify_type(name)
+        vtype = forced_type or classify_type(name)
 
         overview = strip_html(detail.get("overview", ""))
         image = detail.get("firstimage") or it.get("firstimage") or ""
@@ -163,9 +159,28 @@ def main():
             "phone": infocenter,
             "expguide": expguide,
         })
+    return skipped
+
+
+def main():
+    list_items = json.loads(LIST_SRC.read_text(encoding="utf-8"))
+    details = json.loads(DETAIL_SRC.read_text(encoding="utf-8"))
+
+    region_seq = {}
+    views = []
+
+    skipped = process_source(list_items, details, region_seq, views)
+
+    total_raw = len(list_items)
+
+    if BRIDGE_LIST_SRC.exists() and BRIDGE_DETAIL_SRC.exists():
+        bridge_items = json.loads(BRIDGE_LIST_SRC.read_text(encoding="utf-8"))
+        bridge_details = json.loads(BRIDGE_DETAIL_SRC.read_text(encoding="utf-8"))
+        skipped += process_source(bridge_items, bridge_details, region_seq, views, forced_type="bridge")
+        total_raw += len(bridge_items)
 
     OUT.write_text(json.dumps(views, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"총 {len(list_items)}건 중 {len(views)}개 저장, {skipped}개 스킵 -> {OUT}")
+    print(f"총 {total_raw}건 중 {len(views)}개 저장, {skipped}개 스킵 -> {OUT}")
 
     type_count = {}
     region_count = {}

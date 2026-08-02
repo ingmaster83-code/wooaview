@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% if page.title %}{{ page.title }} | 우아뷰{% else %}우아뷰 - 전국 전망대·스카이워크 정보{% endif %}</title>
+  <title>{% if page.title %}{{ page.title }} | 우아뷰{% else %}우아뷰 - 전국 전망대·스카이워크·출렁다리 정보{% endif %}</title>
   <meta name="description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
   <link rel="canonical" href="{{ page.url | absolute_url }}">
 
@@ -18,7 +18,7 @@
   {% endif %}
   {% else %}
   <meta property="og:type" content="website">
-  <meta property="og:title" content="{% if page.title %}{{ page.title }} | 우아뷰{% else %}우아뷰 - 전국 전망대·스카이워크 정보{% endif %}">
+  <meta property="og:title" content="{% if page.title %}{{ page.title }} | 우아뷰{% else %}우아뷰 - 전국 전망대·스카이워크·출렁다리 정보{% endif %}">
   <meta property="og:description" content="{% if page.description %}{{ page.description }}{% else %}{{ site.description }}{% endif %}">
   <meta property="og:image" content="{{ '/assets/og-image.png' | absolute_url }}">
   {% endif %}
