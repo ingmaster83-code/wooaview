@@ -1,0 +1,62 @@
+---
+layout: default
+---
+
+<div class="market-layout">
+<div class="list-page">
+
+  <nav class="breadcrumb">
+    <a href="/">홈</a>
+    <span>›</span>
+    <span>{{ page.type_label }}</span>
+  </nav>
+
+  <div class="list-header">
+    <h1>{{ page.type_icon }} 전국 {{ page.type_label }}</h1>
+    <p class="list-count">전국 {{ page.views | size }}곳</p>
+  </div>
+
+  <!-- 광고 -->
+  <div class="ad-slot">{% include ad.html %}</div>
+
+  {% assign by_region = page.views | group_by: 'region' | sort: 'name' %}
+  {% for group in by_region %}
+  {% assign r_slug = group.items.first.regionSlug %}
+  <div class="region-section">
+    <h2 class="region-section-title">
+      <a href="/region/{{ r_slug }}/">{{ group.name }}</a>
+      <span class="group-count">{{ group.items | size }}곳</span>
+    </h2>
+    <div class="market-cards">
+      {% for v in group.items %}
+      <a href="/view/{{ v.slug }}/" class="market-card {% if v.image and v.image != '' %}has-img{% endif %}">
+        {% if v.image and v.image != "" %}
+        <img class="market-card-img" src="{{ v.image }}" alt="{{ v.viewName }}" loading="lazy">
+        <div class="market-card-body">
+        {% endif %}
+        <div class="card-name">{{ v.viewName }}</div>
+        <div class="card-city">{{ v.city }}</div>
+        {% if v.image and v.image != "" %}</div>{% endif %}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+
+  <div class="ad-slot">{% include ad.html %}</div>
+
+  <div class="days-nav">
+    <h3>다른 유형</h3>
+    <div class="days-btn-grid">
+      {% unless page.type_key == "observation" %}<a href="/type/observation/" class="days-btn-sm">🔭 전망대</a>{% endunless %}
+      {% unless page.type_key == "tower" %}<a href="/type/tower/" class="days-btn-sm">🗼 전망타워</a>{% endunless %}
+      {% unless page.type_key == "skywalk" %}<a href="/type/skywalk/" class="days-btn-sm">🌉 스카이워크</a>{% endunless %}
+      {% unless page.type_key == "etc" %}<a href="/type/etc/" class="days-btn-sm">📍 기타 명소</a>{% endunless %}
+    </div>
+  </div>
+
+</div>
+<aside class="market-sidebar">
+  {% include ad.html slot="6255378195" label="사이드바" %}
+</aside>
+</div>
